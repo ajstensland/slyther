@@ -8,6 +8,7 @@ from src.keys import login
 from src.contacts import load_contacts, save_contacts
 from src.ui import *
 
+
 def print_banner():
     """Prints the entry banner."""
     print_green("/////////////////////")
@@ -89,7 +90,7 @@ if __name__ == "__main__":
 
     # Bind socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        server_addr = ("127.0.0.1", PORT)
+        server_addr = ("0.0.0.0", PORT)
         sock.bind(server_addr)
         sock.listen(5)
 
