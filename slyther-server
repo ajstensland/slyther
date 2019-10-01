@@ -29,7 +29,7 @@ def get_contact_name(ip, contacts):
         The name of the contact if the IP is known, otherwise the IP.
     """
     for contact in contacts:
-        if contacts[contact]["ip"] == ip:
+        if contacts[contact]["ip"] == ip and contact != ip:
             return contact
     return ip
 
