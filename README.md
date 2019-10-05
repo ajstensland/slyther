@@ -1,5 +1,5 @@
 # slyther
-Slyther is an encrypted peer-to-peer messaging platform written in Python. Slyther employs the [pycryptodome](https://github.com/Legrandin/pycryptodome) library for encryption.
+Slyther is an encrypted peer-to-peer messaging platform written in Python. Slyther employs the [pycryptodome](https://github.com/Legrandin/pycryptodome) library for its cryptographical needs.
 
 ## Disclaimer
 I make no claims regarding the security of this program. While it is encrypted, I may have made some errors blatant to the average cryptanalyst. Pycryptodome may also have vulnerabilities I am unaware of.
@@ -29,8 +29,13 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
     1. Alice encrypts her message with the AES key and sends the encrypted message to Bob
     1. Alice signs the SHA512 hash of her message, encrypts it with the AES hey, and sends it to Bob
 
-## Bugs and Future Features
-A list of bugs and features here.
+## Known Bugs
+- A lack of `data/keys/` and `data/contacts/` raises an unhandled `OSError`
+- Attempting to view messages when no messages are stored results in an infinite loop of contact prompts
+- No way to cancel any menu action
+- Messages that fail to send are still logged with the client
+- Long usernames are not trimmed in the *View Messages* menu, which can result in malformed columns
+- Inaccessible keys and contacts raise an unhandled `OSError`
 
 ## Acknowledgements
 
