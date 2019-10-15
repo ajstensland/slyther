@@ -6,12 +6,7 @@ I make no claims regarding the security of this program. While it is encrypted, 
 
 Do not trust this program with anything remotely important. No personal information, no credit cards, no SSNs. I am not responsible for damages incurred by the improper usage of slyther or slyther-server.
 
-#### *Call for Comments*
-If you notice that I'm making a severe mistake with the security of this program, please let me know. This has been purely a learning experience for me, and if you can provide more lessons for me to learn about this topic, please let me know!
-
-## Usage
-Some details about usage here, preferably with screenshots at some point.
-
+**If you notice that I'm making a severe mistake** with the security of this program, **please let me know**. This has been purely a learning experience for me, and if you can provide more lessons for me to learn about this topic, please let me know!
 
 ## Protocol
 Given that Alice (A) wants to send Bob (B) a message through slyther, three steps take place. Slyther uses a mixture of RSA with OAEP and AES-128-EAX to encrypt messages, and SHA512 hashes (with RSA) for digital signatures.
@@ -30,7 +25,7 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
     1. Alice signs the SHA512 hash of her message, encrypts it with the AES hey, and sends it to Bob
 
 ## Known Bugs
-- A lack of `data/keys/` and `data/contacts/` raises an unhandled `OSError`
+~~- A lack of `data/keys/` and `data/contacts/` raises an unhandled `OSError`~~ (Fixed [6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
 - Attempting to view messages when no messages are stored results in an infinite loop of contact prompts
 - No way to cancel any menu action
 - Messages that fail to send are still logged with the client
