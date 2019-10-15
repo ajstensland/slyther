@@ -97,9 +97,14 @@ if __name__ == "__main__":
         # Acceptance loop
         print("Listening for connections...")
         while True:
-            connection, addr = sock.accept()
-            print("Connection")
-            connection_thread = Thread( target=handle_client, 
-                                        args=(connection, addr, public, private))
-            connection_thread.start()
+            try:
+                connection, addr = sock.accept()
+                print("Connection")
+                connection_thread = Thread( target=handle_client, 
+                                            args=(connection, addr, public, private))
+                connection_thread.start()
+            except KeyboardInterrupt:
+                if confirm("\nAre you sure you'd like to close slyther-server? (Y/n) "):
+                   break 
+
 
