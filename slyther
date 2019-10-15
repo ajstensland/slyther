@@ -36,24 +36,18 @@ def transmit_message(contact, message, public, private):
     """
     contact_addr = (contact["ip"], PORT)
 
-    try:
-        with socket.create_connection(contact_addr, 15) as sock:
-            # Exchanging public keys
-            send(sock, public.export_key())
-            client_public = RSA.import_key(recieve(sock))
+    with socket.create_connection(contact_addr, 15) as sock:
+        # Exchanging public keys
+        send(sock, public.export_key())
+        client_public = RSA.import_key(recieve(sock))
 
-            # Creating and sending session key
-            session = get_random_bytes(16)
-            send_session(sock, session, client_public, private)
+        # Creating and sending session key
+        session = get_random_bytes(16)
+        send_session(sock, session, client_public, private)
 
-            # Sending message
-            send_aes(sock, message, session, private)
+        # Sending message
+        send_aes(sock, message, session, private)
 
-    except socket.error as e:
-        print_red("Error: Failed to connect to contact. Transmission cancelled.")
-
-    except socket.timeout:
-        print_red("Error: Connection timed out. Transmission incomplete.")
 
 
 def create_message(public, private):
@@ -62,13 +56,22 @@ def create_message(public, private):
     recipient = get_recipient(contacts)
     contacts = load_contacts() # Sloppy. Will be handled later. (This updates in the case of a new contact in get_recipient)
     message = input_handled("Message:\n").encode()
-    transmit_message(contacts[recipient], message, public, private)
-    message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                        "to": recipient, 
-                        "from": "me", 
-                        "contents": message.decode()}
-    contacts[recipient]["messages"].append(message_receipt)
-    save_contacts(contacts)
+    
+    try:
+        transmit_message(contacts[recipient], message, public, private)
+    
+    except socket.error as e:
+        print_red("Error: Failed to connect to contact. Transmission cancelled.")
+
+    except socket.timeout:
+        print_red("Error: Connection timed out. Transmission incomplete.")
+    else:
+        message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
+                            "to": recipient, 
+                            "from": "me", 
+                            "contents": message.decode()}
+        contacts[recipient]["messages"].append(message_receipt)
+        save_contacts(contacts)
 
 
 def display_messages_menu(contacts):
