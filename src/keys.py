@@ -1,10 +1,12 @@
 from Crypto.PublicKey import RSA
-from os.path import isfile
+from os import makedirs
+from os.path import exists, isfile
 from src.ui import *
 from time import sleep
 from random import random
 
 
+DIR = "data/keys/"
 PUBLIC_PATH = "data/keys/public.pem"
 PRIVATE_PATH = "data/keys/private.pem"
 
@@ -69,6 +71,9 @@ def save_keys(private, public, password):
     encrypted_private = private.export_key(passphrase=password,
                                            pkcs=8,
                                            protection="scryptAndAES128-CBC")
+
+    if not exists(DIR):
+        makedirs(DIR)
 
     try:
         with open(PRIVATE_PATH, "wb") as private_file:

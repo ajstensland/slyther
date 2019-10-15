@@ -1,6 +1,9 @@
 import json
+from os.path import exists
+from os import makedirs
 from src.ui import *
 
+CONTACTS_DIR = "data/contacts/"
 CONTACTS_PATH = "data/contacts/contacts.json"
 
 def load_contacts():
@@ -27,7 +30,10 @@ def load_contacts():
     except FileNotFoundError:
         return {}
     except OSError:
-        print_red("Contacts file not accessible.")
+        if not exists(CONTACTS_DIR):
+            makedirs(CONTACTS_DIR)
+        else:
+            print_red("Error: Contacts file not accessible.")
         return {}
 
 
@@ -42,7 +48,10 @@ def save_contacts(contacts):
         with open(CONTACTS_PATH, "w") as contacts_file:
             json.dump(contacts, contacts_file)
     except OSError:
-        print_red("Contacts file not accessible. Contacts not saved.".format(CONTACTS_PATH))
+        if not exists(CONTACTS_DIR):
+            makedirs(CONTACTS_DIR)
+        else:
+            print_red("Error: Contacts file not accessible.")
 
 
 def get_recipient(contacts):
