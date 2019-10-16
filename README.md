@@ -25,7 +25,7 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
     1. Alice signs the SHA512 hash of her message, encrypts it with the AES hey, and sends it to Bob
 
 ## Known Bugs
-~~- A lack of `data/keys/` and `data/contacts/` raises an unhandled `OSError`~~ (Fixed [6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
+- ~~A lack of `data/keys/` and `data/contacts/` raises an unhandled `OSError`~~ (Fixed [6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
 - Attempting to view messages when no messages are stored results in an infinite loop of contact prompts
 - No way to cancel any menu action
 - Messages that fail to send are still logged with the client
