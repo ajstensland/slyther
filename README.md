@@ -32,13 +32,6 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
 - ~~No way to cancel any menu action~~ (Fixed [#0d1c133](https://github.com/ajstensland/slyther/commit/00a7078f90983ea1f89a87a7c598bfb5e4fb028b))
 - ~~Inaccessible keys and contacts raise an unhandled `OSError`~~ (Fixed [#6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
 
-## Desired Features
-- Encrypted user data (messages, contacts, etc.)
-- Fingerprint system (generation and verification)
-- Live, rich user interface implemented with something like `npyscreen`
-- Group chats
-- Contact removal
-
 ## Acknowledgements
 
 Big thanks to Hedde van der Heide and Adam Rosenfield for their [StackOverflow answer](https://stackoverflow.com/questions/17667903/python-socket-receive-large-amount-of-data) on sending and recieving large messages over sockets
