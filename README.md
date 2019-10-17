@@ -26,13 +26,18 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
 
 ## Known Bugs
 - Long usernames are not trimmed in the *View Messages* menu, which can result in malformed columns
-- Fingerprint system not implemented
-- No way to remove contacts
 - ~~Messages that fail to send are still logged with the client~~ (Fixed [#7a540b5](https://github.com/ajstensland/slyther/commit/7a540b53e5341b31f9b9147188241e3b6c0a3f78))
 - ~~A lack of `data/keys/` and `data/contacts/` raises an unhandled `OSError`~~ (Fixed [#6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
 - ~~Attempting to view messages when no messages are stored results in an infinite loop of contact prompts~~ (Fixed [#0d1c133](https://github.com/ajstensland/slyther/commit/00a7078f90983ea1f89a87a7c598bfb5e4fb028b))
 - ~~No way to cancel any menu action~~ (Fixed [#0d1c133](https://github.com/ajstensland/slyther/commit/00a7078f90983ea1f89a87a7c598bfb5e4fb028b))
 - ~~Inaccessible keys and contacts raise an unhandled `OSError`~~ (Fixed [#6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
+
+## Desired Features
+- Encrypted user data (messages, contacts, etc.)
+- Fingerprint system (generation and verification)
+- Live, rich user interface implemented with something like `npyscreen`
+- Group chats
+- Contact removal
 
 ## Acknowledgements
 
