@@ -1,12 +1,44 @@
 import socket
 import struct
 from Crypto.Random import get_random_bytes
+from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.Signature import pkcs1_15
 
 
 PORT = 5300
+
+
+def transmit(contact, message, public, private):
+    """
+    Sends a message to the provided contact.
+
+    Args:
+        contact: The contact information of the recipient in the format:
+            { "ip": <ip>, "fingerprint": <fingerprint>, "messages": <messages>}
+            For more detail, see load_contacts() in src/contacts.py.
+        message: The message (in bytes) to send.
+        public: The user's public RSA key.
+        private: The user's private RSA key.
+
+    Raises:
+        socket.error: Client server not accessible.
+        socket.timeout: Connection timed out.
+    """
+    contact_addr = (contact["ip"], PORT)
+
+    with socket.create_connection(contact_addr, 15) as sock:
+        # Exchanging public keys
+        send(sock, public.export_key())
+        client_public = RSA.import_key(recieve(sock))
+
+        # Creating and sending session key
+        session = get_random_bytes(16)
+        send_session(sock, session, client_public, private)
+
+        # Sending message
+        send_aes(sock, message, session, private)
 
 
 def send(sock, message):

@@ -1,167 +1,174 @@
 #!/usr/bin/env python3
-from Crypto.PublicKey import RSA
-from Crypto.Random import get_random_bytes
 from time import sleep
 from datetime import datetime
 from random import random
 from subprocess import run
 import json
-import socket
-import struct
 
 from src.ui import *
 from src.keys import login
-from src.socks import recieve, send, send_session, send_aes, PORT
-from src.contacts import load_contacts, save_contacts, new_contact, display_contact, get_recipient
+import src.socks as socks
+from src.contacts import load_contacts, save_contacts, display_contact, display_convo, display_messages
 
 
-def print_banner():
-    """Prints the slyther entry banner."""
-    print_green("///////////////////")
-    print_green("// s l y t h e r //")
-    print_green("///////////////////")
+class Application:
+    def __init__(self, public, private):
+        self.public = public
+        self.private = private
 
 
-def transmit_message(contact, message, public, private):
-    """
-    Sends a message to the provided contact.
-
-    Args:
-        contact: The contact information of the recipient in the format:
-            { "ip": <ip>, "fingerprint": <fingerprint>, "messages": <messages>}
-            For more detail, see load_contacts() in src/contacts.py.
-        message: The message (in bytes) to send.
-        public: The user's public RSA key.
-        private: The user's private RSA key.
-    """
-    contact_addr = (contact["ip"], PORT)
-
-    with socket.create_connection(contact_addr, 15) as sock:
-        # Exchanging public keys
-        send(sock, public.export_key())
-        client_public = RSA.import_key(recieve(sock))
-
-        # Creating and sending session key
-        session = get_random_bytes(16)
-        send_session(sock, session, client_public, private)
-
-        # Sending message
-        send_aes(sock, message, session, private)
+    def run(self):
+        while True:
+            try:
+                self.main_menu()
+            except KeyboardInterrupt:
+                self.quit()
 
 
-
-def create_message(public, private):
-    """Walks the user through creating a message, and sends the completed message."""
-    contacts = load_contacts()
-    recipient = get_recipient(contacts)
-    contacts = load_contacts() # Sloppy. Will be handled later. (This updates in the case of a new contact in get_recipient)
-    message = input_handled("Message:\n").encode()
-    
-    try:
-        transmit_message(contacts[recipient], message, public, private)
-    
-    except socket.error as e:
-        print_red("Error: Failed to connect to contact. Transmission cancelled.")
-
-    except socket.timeout:
-        print_red("Error: Connection timed out. Transmission incomplete.")
-    else:
-        message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                            "to": recipient, 
-                            "from": "me", 
-                            "contents": message.decode()}
-        contacts[recipient]["messages"].append(message_receipt)
-        save_contacts(contacts)
-
-
-def display_messages_menu(contacts):
-    for contact in contacts:
-        if contacts[contact]["messages"]:
-            message = contacts[contact]["messages"][-1]["contents"]
-            trimmed_msg = message if len(message) < 20 else (message[:27] + "...")
-            timestamp = contacts[contact]["messages"][-1]["time"]
-            print("{}  >  {:30s}  <  {}".format(contact, trimmed_msg, timestamp))
-        else:
-            print("{}  >  {:^30s}  <".format(contact, "-- No messages --"))
-
-
-def view_messages(contact):
-    for message in contact["messages"]:
-        print("{} {}: {}".format(message["time"], message["from"], message["contents"]))
-
-
-def messages_menu():
-    contacts = load_contacts()
-    display_messages_menu(contacts)
-    
-    contact = ""
-    while True:
-        contact = input_handled("Enter contact name: ")
+    def main_menu(self):
+        """
+        Runs the main loop of the program, where the user enters commands.
         
-        if contact in contacts:
-            break
+        Args:
+            public: The user's public key loaded from login().
+            private: The user's private key loaded from login().
+        """
+        self.display_help()
+        commands = {"sm": self.create_message, 
+                    "vm": self.messages_menu,
+                    "nc": self.new_contact, 
+                    "lc": self.list_contacts,
+                    "c" : self.clear_screen,
+                    "h" : self.display_help,
+                    "q" : self.quit 
+                    }
+
+        while True:
+            command = get_command(commands)
+            self.handle_context(commands[command])
+
+
+    def create_message(self):
+        """
+        Walks the user through creating a message, and sends the completed message.
+        """
+        contacts = load_contacts()
+        print_bar("SEND MESSAGE")
+        recipient = get_recipient(contacts)
+        message = input("Message:\n").encode()
+        
+        try:
+            socks.transmit(contacts[recipient], message, self.public, self.private)
+        
+        except socket.error as e:
+            print_red("Error: Failed to connect to contact. Transmission cancelled.\n")
+        except socket.timeout:
+            print_red("Error: Connection timed out. Transmission incomplete.\n")
         else:
-            print_red("Contact not recognized. Please try again.")
-
-    view_messages(contacts[contact])
-
-
-def list_contacts():
-    """Displays each of the contacts in the contacts file."""
-    contacts = load_contacts()
-    for name in contacts:
-        display_contact(name, contacts)
+            message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
+                                "to": recipient, 
+                                "from": "me", 
+                                "contents": message.decode()}
+            contacts[recipient]["messages"].append(message_receipt)
+            save_contacts(contacts)
+            print_green("Message delivered successfully.\n")
 
 
-def clear_screen():
-    run(["clear"])
+    def messages_menu(self):
+        print_bar("VIEW MESSAGES")
+        contacts = load_contacts()
+        display_messages(contacts)
+        
+        contact = ""
+        while True:
+            contact = input("Enter name to view conversation: ")
+            
+            if contact in contacts:
+                break
+            else:
+                print_red("Contact not recognized. Please try again.")
 
+        display_convo(contacts[contact])
 
-def display_help():
-    """Displays a list of valid commands and their meanings."""
-    print("Enter a command...")
-    print("sm   -> New Message")
-    print("vm   -> View Messages")
-    print("nc   -> New/Update Contact")
-    print("lc   -> List Contacts")
-    print("c    -> Clear Screen")
-    print("h    -> Display help")
-    print("q    -> Quit slyther")
+    def new_contact(self):
+        """
+        Walks a user through the process of creating a new contact.
 
+        Returns:
+            The name of the contact created (used in get_recipient()).
+        """
+        print_bar("NEW CONTACT")
+        contacts = load_contacts()
+        print("Enter the information for your new contact...")
+        name = input("Name: ")
+        ip = get_ip()
+        fingerprint = input_default("Fingerprint", None)
 
-def quit():
-    """Prompts the user to exit slyther."""
-    if confirm("Exit slyther? (Y/n) "):
-        exit()
+        if name not in contacts:
+            contacts[name] = {"ip": ip, "fingerprint": fingerprint, "messages": []}
+            print_green("Contact added.\n")
+        else:
+            print_yellow("\n--- Warning: Contact exists ---")
+            print_yellow("Existing Contact:")
+            display_contact(name, contacts)
 
+            print_yellow("\nNew Contact:")
+            print_green(name)
+            print("IP:", ip)
+            print("Fingerprint:", fingerprint)
 
-def main_menu(public, private):
-    """
-    Runs the main loop of the program, where the user enters commands.
+            if confirm("\nUpdate contact information for {}? (Y/n) ".format(name)):
+                contacts[name]["ip"] = ip
+                contacts[name]["fingerprint"] = fingerprint
+                print_green("Contact updated.\n")
+            else:
+                print_green("Contact update cancelled.\n")
+
+        save_contacts(contacts)
+        return name
+
     
-    Args:
-        public: The user's public key loaded from login().
-        private: The user's private key loaded from login().
-    """
-    display_help()
-    commands = {"sm": create_message, 
-                "vm": messages_menu,
-                "nc": new_contact, 
-                "lc": list_contacts,
-                "c": clear_screen,
-                "h": display_help,
-                "q": quit }
+    def list_contacts(self):
+        """Displays each of the contacts in the contacts file."""
+        contacts = load_contacts()
+        print_bar("CONTACTS LIST")
+        for name in contacts:
+            display_contact(name, contacts)
 
-    while True:
-        command = get_command(commands)
-        if command == "sm":
-            create_message(public, private)
-        else:
-            commands[command]()
+
+    def clear_screen(self):
+        run(["clear"])
+
+
+    def display_help(self):
+        """Displays a list of valid commands and their meanings."""
+        print("Enter a command...")
+        print("sm   -> New Message")
+        print("vm   -> View Messages")
+        print("nc   -> New/Update Contact")
+        print("lc   -> List Contacts")
+        print("c    -> Clear Screen")
+        print("h    -> Display help")
+        print("q    -> Quit slyther")
+
+    
+    def quit(self):
+        """Prompts the user to exit slyther."""
+        if confirm("\nExit slyther? (Y/n) "):
+            exit()
+
+
+    def handle_context(self, func):
+        try:
+            func()
+        except KeyboardInterrupt:
+            print("\n")
 
 
 if __name__ == "__main__":
     print_banner()
     public, private = login()
-    main_menu(public, private)
+    
+    Application(public, private).run()
+    print_red("Exiting slyther...")
 

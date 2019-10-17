@@ -23,13 +23,11 @@ def print_red(msg):
     print("{0}{1}{2}".format(COLORS["red"], msg, COLORS["endc"]))
 
 
-def input_handled(prompt):
-    """Wrapper for input() that handles KeyboardInterrupts."""
-    try:
-        return input(prompt)
-    except KeyboardInterrupt:
-        print_red("\nAborting...")
-        exit()
+def print_banner():
+    """Prints the slyther entry banner."""
+    print_green("///////////////////")
+    print_green("// s l y t h e r //")
+    print_green("///////////////////")
 
 
 def getpass_handled(prompt):
@@ -43,20 +41,20 @@ def getpass_handled(prompt):
 
 def confirm(prompt):
     """Displays the prompt, only returns true with input 'Y' or 'y'."""
-    confirmation = input_handled(COLORS["yellow"] + prompt + COLORS["endc"]).lower()
+    confirmation = input(COLORS["yellow"] + prompt + COLORS["endc"]).lower()
     return confirmation == "y"
 
 
 def input_default(prompt, default):
     """Displays the prompt, returns input (default if user enters nothing)."""
-    response = input_handled("{} [{}]: ".format(prompt, default))
+    response = input("{} [{}]: ".format(prompt, default))
     return response if response else default
 
 
 def get_ip():
     """Prompts the user for and returns a valid IP address string."""
     while True:
-        ip = input_handled("IP: ")
+        ip = input("IP: ")
 
         # Check if the ip has 3 "."s. inet_aton does not verify this
         if len(ip.split(".")) != 4:
@@ -73,13 +71,33 @@ def get_ip():
         return ip
 
 
+def get_recipient(contacts):
+    """
+    Prompts a user for a contact. If a valid one is not provided, the user may 
+    create a new one.
+    
+    Args:
+        contacts: The contacts dictionary to select from."""
+    while True:
+        recipient = input("To: ")
+
+        if recipient in contacts:
+            return recipient
+        else:
+            print_red("Contact not recognized.")
+
+
 def get_command(commands):
     """Prompts for a command, and returns when the user has chosen a valid one."""
     while True:
-        command = input_handled("> ").lower()
+        command = input("> ").lower()
 
         if command in commands:
             return command
         else:
             print_red("Invalid command. Please try again.")
+
+
+def print_bar(msg):
+    print("-"*(16 - int(.5 * len(msg))), msg, "-"*(16 - int(.5 * len(msg))))
 

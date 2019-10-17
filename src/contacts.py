@@ -50,62 +50,12 @@ def save_contacts(contacts):
     except OSError:
         if not exists(CONTACTS_DIR):
             makedirs(CONTACTS_DIR)
+            with open(CONTACTS_PATH, "w") as contacts_file:
+                json.dump(contacts, contacts_file)
         else:
             print_red("Error: Contacts file not accessible.")
 
 
-def get_recipient(contacts):
-    """
-    Prompts a user for a contact. If a valid one is not provided, the user may 
-    create a new one.
-    
-    Args:
-        contacts: The contacts dictionary to select from."""
-    while True:
-        recipient = input_handled("To: ")
-
-        if recipient in contacts:
-            return recipient
-        else:
-            if confirm("Contact not recognized. Make new contact? (Y/n) "):
-                return new_contact()
-
-
-def new_contact():
-    """
-    Walks a user through the process of creating a new contact.
-
-    Returns:
-        The name of the contact created (used in get_recipient()).
-    """
-    contacts = load_contacts()
-    print("Enter the information for your new contact...")
-    name = input_handled("Name: ")
-    ip = get_ip()
-    fingerprint = input_default("Fingerprint", None)
-
-    if name not in contacts:
-        contacts[name] = {"ip": ip, "fingerprint": fingerprint, "messages": []}
-        print_green("Contact added.\n")
-    else:
-        print_yellow("\n--- Warning: Contact exists ---")
-        print_yellow("Existing Contact:")
-        display_contact(name, contacts)
-
-        print_yellow("\nNew Contact:")
-        print_green(name)
-        print("IP:", ip)
-        print("Fingerprint:", fingerprint)
-
-        if confirm("\nUpdate contact information for {}? (Y/n) ".format(name)):
-            contacts[name]["ip"] = ip
-            contacts[name]["fingerprint"] = fingerprint
-            print_green("Contact updated.\n")
-        else:
-            print_green("Contact update cancelled.\n")
-
-    save_contacts(contacts)
-    return name
 
 
 def display_contact(name, contacts):
@@ -119,5 +69,24 @@ def display_contact(name, contacts):
     print_green(name)
     print("IP:", contacts[name]["ip"])
     print("Fingerprint:", contacts[name]["fingerprint"])
+    print()
+
+
+def display_convo(contact):
+    print_bar("VIEW CONVERSATION")
+    for message in contact["messages"]:
+        print("{} {}: {}".format(message["time"], message["from"], message["contents"]))
+    print()
+
+
+def display_messages(contacts):
+    for contact in contacts:
+        if contacts[contact]["messages"]:
+            message = contacts[contact]["messages"][-1]["contents"]
+            trimmed_msg = message if len(message) < 20 else (message[:27] + "...")
+            timestamp = contacts[contact]["messages"][-1]["time"]
+            print("{}  >  {:30s}  <  {}".format(contact, trimmed_msg, timestamp))
+        else:
+            print("{}  >  {:^30s}  <".format(contact, "-- No messages --"))
     print()
 
