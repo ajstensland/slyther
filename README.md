@@ -1,6 +1,8 @@
 # slyther
 Slyther is an encrypted peer-to-peer messaging platform written in Python. Slyther employs the [pycryptodome](https://github.com/Legrandin/pycryptodome) library for its cryptographical needs.
 
+Created as a project-based learning venture because I wanted to design a protocol and to learn how to use sockets and encryption.
+
 ## Disclaimer
 I make no claims regarding the security of this program. While it is encrypted, I may have made some errors blatant to the average cryptanalyst. Pycryptodome may also have vulnerabilities I am unaware of. **Do not trust this program with anything remotely important.** No personal information, no credit cards, no SSNs. I am not responsible for damages incurred by the improper usage of slyther or slyther-server.
 
