@@ -55,23 +55,28 @@ class Application:
         contacts = load_contacts()
         print_bar("SEND MESSAGE")
         recipient = get_recipient(contacts)
-        message = input("Message:\n").encode()
-        
-        try:
-            socks.transmit(contacts[recipient], message, self.public, self.private)
-        
-        except socket.error as e:
-            print_red("Error: Failed to connect to contact. Transmission cancelled.\n")
-        except socket.timeout:
-            print_red("Error: Connection timed out. Transmission incomplete.\n")
-        else:
-            message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                                "to": recipient, 
-                                "from": "me", 
-                                "contents": message.decode()}
-            contacts[recipient]["messages"].append(message_receipt)
-            save_contacts(contacts)
-            print_green("Message delivered successfully.\n")
+
+        while True:
+            display_convo(contacts[recipient])
+            message = input("Message: ").encode()
+            
+            try:
+                socks.transmit(contacts[recipient], message, self.public, self.private)
+            
+            except socket.error as e:
+                print_red("Error: Failed to connect to contact. Transmission cancelled.\n")
+                break
+            except socket.timeout:
+                print_red("Error: Connection timed out. Transmission incomplete.\n")
+                break
+            else:
+                message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
+                                    "to": recipient, 
+                                    "from": "me", 
+                                    "contents": message.decode()}
+                contacts[recipient]["messages"].append(message_receipt)
+                save_contacts(contacts)
+                print_green("Message delivered successfully.\n")
 
 
     def messages_menu(self):
