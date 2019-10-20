@@ -24,14 +24,6 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
     1. Alice encrypts her message with the AES key and sends the encrypted message to Bob
     1. Alice signs the SHA512 hash of her message, encrypts it with the AES hey, and sends it to Bob
 
-## Known Bugs
-- Long usernames are not trimmed in the *View Messages* menu, which can result in malformed columns
-- ~~Messages that fail to send are still logged with the client~~ (Fixed [#7a540b5](https://github.com/ajstensland/slyther/commit/7a540b53e5341b31f9b9147188241e3b6c0a3f78))
-- ~~A lack of `data/keys/` and `data/contacts/` raises an unhandled `OSError`~~ (Fixed [#6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
-- ~~Attempting to view messages when no messages are stored results in an infinite loop of contact prompts~~ (Fixed [#0d1c133](https://github.com/ajstensland/slyther/commit/00a7078f90983ea1f89a87a7c598bfb5e4fb028b))
-- ~~No way to cancel any menu action~~ (Fixed [#0d1c133](https://github.com/ajstensland/slyther/commit/00a7078f90983ea1f89a87a7c598bfb5e4fb028b))
-- ~~Inaccessible keys and contacts raise an unhandled `OSError`~~ (Fixed [#6756112](https://github.com/ajstensland/slyther/commit/67561128375bfeb3eaf2957948ee57fa99ae4da5))
-
 ## Acknowledgements
 
 Big thanks to Hedde van der Heide and Adam Rosenfield for their [StackOverflow answer](https://stackoverflow.com/questions/17667903/python-socket-receive-large-amount-of-data) on sending and recieving large messages over sockets
