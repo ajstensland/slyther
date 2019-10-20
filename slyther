@@ -34,10 +34,10 @@ class Application:
             private: The user's private key loaded from login().
         """
         self.display_help()
-        commands = {"sm": self.create_message, 
-                    "vm": self.messages_menu,
+        commands = {"oc": self.open_conversation, 
                     "nc": self.new_contact, 
                     "lc": self.list_contacts,
+                    "dc": self.delete_contact,
                     "c" : self.clear_screen,
                     "h" : self.display_help,
                     "q" : self.quit 
@@ -48,12 +48,12 @@ class Application:
             self.handle_context(commands[command])
 
 
-    def create_message(self):
+    def open_conversation(self):
         """
         Walks the user through creating a message, and sends the completed message.
         """
         contacts = load_contacts()
-        print_bar("SEND MESSAGE")
+        print_bar("VIEW CONVERSATION")
         recipient = get_recipient(contacts)
 
         while True:
@@ -78,22 +78,6 @@ class Application:
                 save_contacts(contacts)
                 print_green("Message delivered successfully.\n")
 
-
-    def messages_menu(self):
-        print_bar("VIEW MESSAGES")
-        contacts = load_contacts()
-        display_messages(contacts)
-        
-        contact = ""
-        while True:
-            contact = input("Enter name to view conversation: ")
-            
-            if contact in contacts:
-                break
-            else:
-                print_red("Contact not recognized. Please try again.")
-
-        display_convo(contacts[contact])
 
     def new_contact(self):
         """
@@ -132,6 +116,18 @@ class Application:
         save_contacts(contacts)
         return name
 
+
+    def delete_contact(self):
+        contacts = load_contacts()
+        print_bar("DELETE CONTACT")
+        name = get_recipient(contacts)
+        if confirm("Are you sure you would like do delete {}? (Y/n)".format(name)):
+            del contacts[name]
+            print_green("Contact deleted.\n")
+            save_contacts(contacts)
+        else:
+            print_red("Aborted.\n")
+
     
     def list_contacts(self):
         """Displays each of the contacts in the contacts file."""
@@ -148,13 +144,13 @@ class Application:
     def display_help(self):
         """Displays a list of valid commands and their meanings."""
         print("Enter a command...")
-        print("sm   -> New Message")
-        print("vm   -> View Messages")
+        print("oc   -> Open Conversation")
         print("nc   -> New/Update Contact")
         print("lc   -> List Contacts")
+        print("dc   -> Delete Contact")
         print("c    -> Clear Screen")
         print("h    -> Display help")
-        print("q    -> Quit slyther")
+        print("q    -> Quit slyther\n")
 
     
     def quit(self):

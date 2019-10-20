@@ -79,7 +79,7 @@ def get_recipient(contacts):
     Args:
         contacts: The contacts dictionary to select from."""
     while True:
-        recipient = input("To: ")
+        recipient = input("Contact Name: ")
 
         if recipient in contacts:
             return recipient

@@ -56,8 +56,6 @@ def save_contacts(contacts):
             print_red("Error: Contacts file not accessible.")
 
 
-
-
 def display_contact(name, contacts):
     """
     Displays information about a given contact.
@@ -85,8 +83,8 @@ def display_messages(contacts):
             message = contacts[contact]["messages"][-1]["contents"]
             trimmed_msg = message if len(message) < 20 else (message[:27] + "...")
             timestamp = contacts[contact]["messages"][-1]["time"]
-            print("{}  >  {:30s}  <  {}".format(contact, trimmed_msg, timestamp))
+            print("{:10s}  >  {:30s}  <  {}".format(contact, trimmed_msg, timestamp))
         else:
-            print("{}  >  {:^30s}  <".format(contact, "-- No messages --"))
+            print("{:10s}  >  {:^30s}  <".format(contact, "-- No messages --"))
     print()
 
