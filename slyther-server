@@ -89,22 +89,25 @@ if __name__ == "__main__":
 
 
     # Bind socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        server_addr = ("0.0.0.0", PORT)
-        sock.bind(server_addr)
-        sock.listen(5)
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            server_addr = ("0.0.0.0", PORT)
+            sock.bind(server_addr)
+            sock.listen(5)
 
-        # Acceptance loop
-        print("Listening for connections...")
-        while True:
-            try:
-                connection, addr = sock.accept()
-                print("Connection")
-                connection_thread = Thread( target=handle_client, 
-                                            args=(connection, addr, public, private))
-                connection_thread.start()
-            except KeyboardInterrupt:
-                if confirm("\nAre you sure you'd like to close slyther-server? (Y/n) "):
-                   break 
+            # Acceptance loop
+            print("Listening for connections...")
+            while True:
+                try:
+                    connection, addr = sock.accept()
+                    print("Connection")
+                    connection_thread = Thread( target=handle_client, 
+                                                args=(connection, addr, public, private))
+                    connection_thread.start()
+                except KeyboardInterrupt:
+                    if confirm("\nAre you sure you'd like to close slyther-server? (Y/n) "):
+                       break 
+    except OSError:
+        print_red("Error: Failed to start slyther-server: Port {} in use.".format(PORT))
 
 
