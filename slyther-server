@@ -3,7 +3,7 @@ import socket
 from threading import Thread
 from Crypto.PublicKey import RSA
 from datetime import datetime
-from src.socks import recieve, recieve_session, recieve_aes, send, PORT
+from src.socks import receive, receive_session, recieve_aes, send, PORT
 from src.keys import login
 from src.contacts import load_contacts, save_contacts
 from src.ui import *
@@ -36,7 +36,7 @@ def get_contact_name(ip, contacts):
 
 def handle_client(sock, addr, public, private):
     """
-    Thread that recieves a message from a connection.
+    Thread that receives a message from a connection.
 
     Args:
         sock: The socket the client has connected on.
@@ -50,19 +50,19 @@ def handle_client(sock, addr, public, private):
     print_green("New connection from {}!".format(display_name))
     
     print(" > Performing key exchange...")
-    client_public = RSA.import_key(recieve(sock))
-    print("    :  Recieved public key.")
+    client_public = RSA.import_key(receive(sock))
+    print("    :  Received public key.")
     send(sock, public.export_key())
     print("    :  Sent public key.")
 
-    print(" > Recieving message...")
+    print(" > Receiving message...")
     try:
-        session_key = recieve_session(sock, client_public, private)
-        print("    : Recieved session key.")
-        message = recieve_aes(sock, client_public, session_key)
-        print("    : Recieved message.")
+        session_key = receive_session(sock, client_public, private)
+        print("    : Received session key.")
+        message = receive_aes(sock, client_public, session_key)
+        print("    : Received message.")
     except ValueError as e:
-        print_red("Error recieving message.")
+        print_red("Error receiving message.")
         print(e)
     else:
         print(" > Storing message...")
