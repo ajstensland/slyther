@@ -81,7 +81,7 @@ def handle_client(sock, addr, public, private):
             contacts[display_name] = {  "name": display_name,
                                         "ip": addr[0],
                                         "fingerprint": None,    # Tweak when fingerprint time
-                              "messages": [message_receipt]}
+                                        "messages": [message_receipt]}
         save_contacts(contacts)
     finally:
         print(" > Closing connection...")
