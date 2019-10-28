@@ -28,9 +28,9 @@ def get_contact_name(ip, contacts):
     Return:
         The name of the contact if the IP is known, otherwise the IP.
     """
-    for contact in contacts:
-        if contacts[contact]["ip"] == ip and contact != ip:
-            return contact
+    for contact_id in contacts:
+        if contacts[contact_id]["ip"] == ip:
+            return contacts[contact_id]["name"]
     return ip
 
 
@@ -70,12 +70,19 @@ def handle_client(sock, addr, public, private):
                             "to": "me", 
                             "from": display_name, 
                             "contents": message.decode() }
-        if display_name in contacts:
-            contacts[display_name]["messages"].append(message_receipt)
+
+        sender_id = 0
+        for contact_id in contacts:
+            if display_name == contacts[contact_id]["name"]:
+                sender_id = contact_id
+
+        if sender_id:
+            contacts[sender_id]["messages"].append(message_receipt)
         else:
-            contacts[display_name] = {  "ip": addr[0],
-                                        "fingerprint": None,    # Tweak when fingerprint time
-                                        "messages": [message_receipt]}
+            contacts[ip] = {  "name": ip,
+                              "ip": addr[0],
+                              "fingerprint": None,    # Tweak when fingerprint time
+                              "messages": [message_receipt]}
         save_contacts(contacts)
     finally:
         print(" > Closing connection...")
