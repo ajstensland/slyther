@@ -6,6 +6,8 @@ Created as a project-based learning venture because I wanted to design an applic
 ### Disclaimer
 I make no claims regarding the security of this program. While it is encrypted, I may have made some errors blatant to the average cryptanalyst. Pycryptodome may also have vulnerabilities I am unaware of. **Do not trust this program with anything remotely important.** No personal information, no credit cards, no SSNs. I am not responsible for damages incurred by the improper usage of slyther or slyther-server.
 
+**If you notice that I'm making a severe mistake** with the security of this program, **please let me know**. This has been purely a learning experience for me, and if you can provide more lessons for me to learn about this topic, please let me know!
+
 ## Quickstart
 
 ```bash
@@ -18,8 +20,6 @@ python -m pip install -r requirements.txt
 # Start client in another terminal
 ./slyther
 ```
-
-**If you notice that I'm making a severe mistake** with the security of this program, **please let me know**. This has been purely a learning experience for me, and if you can provide more lessons for me to learn about this topic, please let me know!
 
 ## Protocol
 Given that Alice (A) wants to send Bob (B) a message through slyther, three steps take place. Slyther uses a mixture of RSA with OAEP and AES-128-EAX to encrypt messages, and SHA512 hashes (with RSA) for digital signatures.
