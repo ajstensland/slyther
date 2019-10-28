@@ -77,14 +77,19 @@ def get_recipient(contacts):
     create a new one.
     
     Args:
-        contacts: The contacts dictionary to select from."""
+        contacts: The contacts dictionary to select from.
+    
+    Returns:
+        The contact ID of a valid contact.
+    """
     while True:
         recipient = input("Contact Name: ")
 
-        if recipient in contacts:
-            return recipient
-        else:
-            print_red("Contact not recognized.")
+        for contact_id in contacts:
+            if recipient == contacts[contact_id]["name"]:
+                return contact_id
+
+        print_red("Contact not recognized.")
 
 
 def get_command(commands):

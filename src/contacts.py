@@ -56,7 +56,7 @@ def save_contacts(contacts):
             print_red("Error: Contacts file not accessible.")
 
 
-def display_contact(name, contacts):
+def display_contact(contact_id, contacts):
     """
     Displays information about a given contact.
 
@@ -64,9 +64,9 @@ def display_contact(name, contacts):
         name: The name of the contact to display.
         contacts: The contacts dictionary to read from.
     """
-    print_green(name)
-    print("IP:", contacts[name]["ip"])
-    print("Fingerprint:", contacts[name]["fingerprint"])
+    print_green(contacts[contact_id]["name"])
+    print("IP:", contacts[contact_id]["ip"])
+    print("Fingerprint:", contacts[contact_id]["fingerprint"])
     print()
 
 
@@ -78,13 +78,14 @@ def display_convo(contact):
 
 
 def display_messages(contacts):
-    for contact in contacts:
-        if contacts[contact]["messages"]:
-            message = contacts[contact]["messages"][-1]["contents"]
+    for contact_id in contacts:
+        contact = contacts[contact_id]
+        if contact["messages"]:
+            message = contact["messages"][-1]["contents"]
             trimmed_msg = message if len(message) < 20 else (message[:27] + "...")
-            timestamp = contacts[contact]["messages"][-1]["time"]
-            print("{:10s}  >  {:30s}  <  {}".format(contact, trimmed_msg, timestamp))
+            timestamp = contact["messages"][-1]["time"]
+            print("{:10s}  >  {:30s}  <  {}".format(contact["name"], trimmed_msg, timestamp))
         else:
-            print("{:10s}  >  {:^30s}  <".format(contact, "-- No messages --"))
+            print("{:10s}  >  {:^30s}  <".format(contact["name"], "-- No messages --"))
     print()
 
