@@ -3,6 +3,19 @@ Slyther is an encrypted peer-to-peer messaging platform written in Python. Slyth
 
 Created as a project-based learning venture because I wanted to design a protocol and to learn how to use sockets and encryption.
 
+## Quickstart
+
+```bash
+# Install dependencies
+python -m pip install -r requirements.txt
+
+# Start server in one terminal
+./slyther-server
+
+# Start client in another terminal
+./slyther
+```
+
 ## Disclaimer
 I make no claims regarding the security of this program. While it is encrypted, I may have made some errors blatant to the average cryptanalyst. Pycryptodome may also have vulnerabilities I am unaware of. **Do not trust this program with anything remotely important.** No personal information, no credit cards, no SSNs. I am not responsible for damages incurred by the improper usage of slyther or slyther-server.
 
@@ -22,8 +35,8 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
     1. Alice encrypts this signature with the AES key and sends the AES-encrypted signature to Bob
 1. **Message Delivery**
     1. Alice encrypts her message with the AES key and sends the encrypted message to Bob
-    1. Alice signs the SHA512 hash of her message, encrypts it with the AES hey, and sends it to Bob
+    1. Alice signs the SHA512 hash of her message, encrypts it with the AES key, and sends it to Bob
 
 ## Acknowledgements
 
-Big thanks to Hedde van der Heide and Adam Rosenfield for their [StackOverflow answer](https://stackoverflow.com/questions/17667903/python-socket-receive-large-amount-of-data) on sending and recieving large messages over sockets
+Big thanks to Hedde van der Heide and Adam Rosenfield for their [StackOverflow answer](https://stackoverflow.com/questions/17667903/python-socket-receive-large-amount-of-data) on sending and receiving large messages over sockets
