@@ -78,9 +78,9 @@ def handle_client(sock, addr, public, private):
         if sender_id:
             contacts[sender_id]["messages"].append(message_receipt)
         else:
-            contacts[ip] = {  "name": ip,
-                              "ip": addr[0],
-                              "fingerprint": None,    # Tweak when fingerprint time
+            contacts[display_name] = {  "name": display_name,
+                                        "ip": addr[0],
+                                        "fingerprint": None,    # Tweak when fingerprint time
                               "messages": [message_receipt]}
         save_contacts(contacts)
     finally:
