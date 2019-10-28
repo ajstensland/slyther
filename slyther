@@ -54,14 +54,14 @@ class Application:
         """
         contacts = load_contacts()
         print_bar("VIEW CONVERSATION")
-        recipient = get_recipient(contacts)
+        contact_id = get_recipient(contacts)
 
         while True:
-            display_convo(contacts[recipient])
+            display_convo(contacts[contact_id])
             message = input("Message: ").encode()
             
             try:
-                socks.transmit(contacts[recipient], message, self.public, self.private)
+                socks.transmit(contacts[contact_id], message, self.public, self.private)
             
             except socket.error as e:
                 print_red("Error: Failed to connect to contact. Transmission cancelled.\n")
@@ -71,10 +71,9 @@ class Application:
                 break
             else:
                 message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                                    "to": recipient, 
-                                    "from": "me", 
+                                    "recieved": False, 
                                     "contents": message.decode()}
-                contacts[recipient]["messages"].append(message_receipt)
+                contacts[contact_id]["messages"].append(message_receipt)
                 save_contacts(contacts)
                 print_green("Message delivered successfully.\n")
 
@@ -88,41 +87,51 @@ class Application:
         """
         print_bar("NEW CONTACT")
         contacts = load_contacts()
+
+        # Get contact information
         print("Enter the information for your new contact...")
         name = input("Name: ")
         ip = get_ip()
         fingerprint = input_default("Fingerprint", None)
 
-        if name not in contacts:
-            contacts[name] = {"ip": ip, "fingerprint": fingerprint, "messages": []}
-            print_green("Contact added.\n")
-        else:
+        # Check for duplicates
+        duplicate_id = 0
+        for contact_id in contacts:
+            if contacts[contact_id]["name"] == name or contacts[contact_id]["ip"] == ip:
+                duplicate_id = contact_id
+                
+        
+        if duplicate_id:
             print_yellow("\n--- Warning: Contact exists ---")
             print_yellow("Existing Contact:")
-            display_contact(name, contacts)
+            display_contact(duplicate_id, contacts)
 
             print_yellow("\nNew Contact:")
             print_green(name)
             print("IP:", ip)
             print("Fingerprint:", fingerprint)
 
-            if confirm("\nUpdate contact information for {}? (Y/n) ".format(name)):
-                contacts[name]["ip"] = ip
-                contacts[name]["fingerprint"] = fingerprint
+            if confirm("\nUpdate contact information for {}? (Y/n) ".format(contacts[duplicate_id]["name"])):
+                contacts[duplicate_id]["name"] = name
+                contacts[duplicate_id]["ip"] = ip
+                contacts[duplicate_id]["fingerprint"] = fingerprint
                 print_green("Contact updated.\n")
             else:
                 print_green("Contact update cancelled.\n")
+        else:
+            new_id = name + ip
+            contacts[new_id] = {"name": name, "ip": ip, "fingerprint": fingerprint, "messages": []}
+            print_green("Contact added.\n")
 
         save_contacts(contacts)
-        return name
 
-
+    
     def delete_contact(self):
         contacts = load_contacts()
         print_bar("DELETE CONTACT")
-        name = get_recipient(contacts)
-        if confirm("Are you sure you would like do delete {}? (Y/n)".format(name)):
-            del contacts[name]
+        contact_id = get_recipient(contacts)
+        if confirm("Are you sure you would like do delete contact information for {}? (Y/n)".format(contacts[contact_id]["name"])):
+            del contacts[contact_id]
             print_green("Contact deleted.\n")
             save_contacts(contacts)
         else:
@@ -133,8 +142,8 @@ class Application:
         """Displays each of the contacts in the contacts file."""
         contacts = load_contacts()
         print_bar("CONTACTS LIST")
-        for name in contacts:
-            display_contact(name, contacts)
+        for contact_id in contacts:
+            display_contact(contact_id, contacts)
 
 
     def clear_screen(self):

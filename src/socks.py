@@ -31,7 +31,7 @@ def transmit(contact, message, public, private):
     with socket.create_connection(contact_addr, 15) as sock:
         # Exchanging public keys
         send(sock, public.export_key())
-        client_public = RSA.import_key(recieve(sock))
+        client_public = RSA.import_key(receive(sock))
 
         # Creating and sending session key
         session = get_random_bytes(16)
@@ -43,7 +43,7 @@ def transmit(contact, message, public, private):
 
 def send(sock, message):
     """
-    Prefixes a message with its size and sends it to be recieved by recvall().
+    Prefixes a message with its size and sends it to be received by recvall().
     
     Args:
         sock: The socket from which to send.
@@ -53,12 +53,12 @@ def send(sock, message):
     sock.sendall(packed)
 
 
-def recieve(sock):
+def receive(sock):
     """
-    Recieves and returns a message sent from send().
+    Receives and returns a message sent from send().
 
     Args:
-        sock: The sock from which to recieve.
+        sock: The sock from which to receive.
     """
     # Get the length of the message
     message_len_raw = recvall(sock, 2)
@@ -72,7 +72,7 @@ def recieve(sock):
 
 def recvall(sock, num_bytes):
     """
-    Recieves a size-prefixed message from the send() function above.
+    Receives a size-prefixed message from the send() function above.
     Thanks to Adam Rosenfield and Hedde van der Heide for the elegant solution.
 
     Args:
@@ -81,14 +81,14 @@ def recvall(sock, num_bytes):
     Returns:
         The complete message received by the socket, or None if no data is received.
     """
-    recieved = bytes()
-    while len(recieved) < num_bytes:
-        data = sock.recv(num_bytes - len(recieved))
+    received = bytes()
+    while len(received) < num_bytes:
+        data = sock.recv(num_bytes - len(received))
         if not data:
             return None
-        recieved += data
+        received += data
 
-    return recieved
+    return received
 
 
 def encrypt_rsa(message, key):
@@ -181,21 +181,21 @@ def send_session(sock, session, client_public, private):
     send(sock, encrypted_signature)
 
 
-def recieve_session(sock, client_public, private):
+def receive_session(sock, client_public, private):
     """
-    Recieves an AES session key over hybrid RSA/AES through a socket.
+    Receives an AES session key over hybrid RSA/AES through a socket.
     
     For further description see send_session().
 
     Args:
         sock: The socket connected to the sender.
         client_public: The sender's public RSA key (as a Crypto.PublicKey.RSA.RsaKey).
-        private: The private RSA key of the reciever (as a Crypto.PublicKey.RSA.RsaKey).
+        private: The private RSA key of the receiver (as a Crypto.PublicKey.RSA.RsaKey).
     """
-    encrypted_session = recieve(sock)
+    encrypted_session = receive(sock)
     session_key = decrypt_rsa(encrypted_session, private)
 
-    encrypted_signature = recieve(sock)
+    encrypted_signature = receive(sock)
     signature = decrypt_aes(encrypted_signature, session_key)
     verify(session_key, signature, client_public)
     
@@ -219,19 +219,19 @@ def send_aes(sock, message, session_key, private):
     send(sock, encrypted_signature)
 
 
-def recieve_aes(sock, client_public, key):
+def receive_aes(sock, client_public, key):
     """
     Decrypts and verifies a message sent through a socket by send_aes().
 
     Args:
         sock: The socket connected to the sender.
         client_public: The sender's public RSA key (as a Crypto.PublicKey.RSA.RsaKey).
-        private: The private RSA key of the reciever (as a Crypto.PublicKey.RSA.RsaKey).
+        private: The private RSA key of the receiver (as a Crypto.PublicKey.RSA.RsaKey).
     """
-    encrypted_message = recieve(sock)
+    encrypted_message = receive(sock)
     message = decrypt_aes(encrypted_message, key)
 
-    encrypted_signature = recieve(sock)
+    encrypted_signature = receive(sock)
     signature = decrypt_aes(encrypted_signature, key)
     verify(message, signature, client_public)
     
