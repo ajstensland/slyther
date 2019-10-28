@@ -73,7 +73,7 @@ def display_contact(contact_id, contacts):
 def display_convo(contact):
     print_bar("CONVERSATION")
     for message in contact["messages"]:
-        print("{} {}: {}".format(message["time"], message["from"], message["contents"]))
+        print("{} {}: {}".format(message["time"], contact["name"] if message["recieved"] else "me", message["contents"]))
     print()
 
 

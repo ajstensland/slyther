@@ -67,8 +67,7 @@ def handle_client(sock, addr, public, private):
     else:
         print(" > Storing message...")
         message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                            "to": "me", 
-                            "from": display_name, 
+                            "recieved": True,
                             "contents": message.decode() }
 
         sender_id = 0

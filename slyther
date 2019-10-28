@@ -71,8 +71,7 @@ class Application:
                 break
             else:
                 message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                                    "to": contacts[contact_id]["name"], 
-                                    "from": "me", 
+                                    "recieved": False, 
                                     "contents": message.decode()}
                 contacts[contact_id]["messages"].append(message_receipt)
                 save_contacts(contacts)
