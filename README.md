@@ -35,8 +35,8 @@ Given that Alice (A) wants to send Bob (B) a message through slyther, three step
     1. Alice encrypts this signature with the AES key and sends the AES-encrypted signature to Bob
 1. **Message Delivery**
     1. Alice encrypts her message with the AES key and sends the encrypted message to Bob
-    1. Alice signs the SHA512 hash of her message, encrypts it with the AES hey, and sends it to Bob
+    1. Alice signs the SHA512 hash of her message, encrypts it with the AES key, and sends it to Bob
 
 ## Acknowledgements
 
-Big thanks to Hedde van der Heide and Adam Rosenfield for their [StackOverflow answer](https://stackoverflow.com/questions/17667903/python-socket-receive-large-amount-of-data) on sending and recieving large messages over sockets
+Big thanks to Hedde van der Heide and Adam Rosenfield for their [StackOverflow answer](https://stackoverflow.com/questions/17667903/python-socket-receive-large-amount-of-data) on sending and receiving large messages over sockets
