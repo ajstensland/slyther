@@ -3,7 +3,7 @@ import socket
 from threading import Thread
 from Crypto.PublicKey import RSA
 from datetime import datetime
-from src.socks import receive, receive_session, recieve_aes, send, PORT
+from src.socks import receive, receive_session, receive_aes, send, PORT
 from src.keys import login
 from src.contacts import load_contacts, save_contacts
 from src.ui import *
