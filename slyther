@@ -54,6 +54,7 @@ class Application:
         """
         contacts = load_contacts()
         print_bar("VIEW CONVERSATION")
+        display_messages(contacts)
         contact_id = get_recipient(contacts)
 
         while True:
