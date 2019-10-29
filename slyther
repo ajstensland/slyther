@@ -60,23 +60,25 @@ class Application:
         while True:
             display_convo(contacts[contact_id])
             message = input("Message: ").encode()
-            
-            try:
-                socks.transmit(contacts[contact_id], message, self.public, self.private)
-            
-            except socket.error as e:
-                print_red("Error: Failed to connect to contact. Transmission cancelled.\n")
-                break
-            except socket.timeout:
-                print_red("Error: Connection timed out. Transmission incomplete.\n")
-                break
-            else:
-                message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                                    "recieved": False, 
-                                    "contents": message.decode()}
-                contacts[contact_id]["messages"].append(message_receipt)
-                save_contacts(contacts)
-                print_green("Message delivered successfully.\n")
+            contacts = load_contacts()
+
+            if len(message.decode()) > 0:
+                try:
+                    socks.transmit(contacts[contact_id], message, self.public, self.private)
+                
+                except socket.error as e:
+                    print_red("Error: Failed to connect to contact. Transmission cancelled.\n")
+                    break
+                except socket.timeout:
+                    print_red("Error: Connection timed out. Transmission incomplete.\n")
+                    break
+                else:
+                    message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
+                                        "recieved": False, 
+                                        "contents": message.decode()}
+                    contacts[contact_id]["messages"].append(message_receipt)
+                    save_contacts(contacts)
+                    print_green("Message delivered successfully.\n")
 
 
     def new_contact(self):
