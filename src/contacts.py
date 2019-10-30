@@ -29,6 +29,7 @@ def load_contacts(private):
                     }
         }
     """
+    print("--> LOAD CONTACTS")
     try:
         with open(CONTACTS_DIR + "enc.key", "rb") as key_file:
             encrypted_key = key_file.read()
