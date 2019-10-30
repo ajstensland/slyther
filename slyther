@@ -52,7 +52,7 @@ class Application:
         """
         Walks the user through creating a message, and sends the completed message.
         """
-        contacts = load_contacts()
+        contacts = load_contacts(self.private)
         print_bar("VIEW CONVERSATION")
         display_messages(contacts)
         contact_id = get_recipient(contacts)
@@ -60,7 +60,7 @@ class Application:
         while True:
             display_convo(contacts[contact_id])
             message = input("Message: ").encode()
-            contacts = load_contacts()
+            contacts = load_contacts(self.private)
 
             if len(message.decode()) > 0:
                 try:
@@ -77,7 +77,7 @@ class Application:
                                         "recieved": False, 
                                         "contents": message.decode()}
                     contacts[contact_id]["messages"].append(message_receipt)
-                    save_contacts(contacts)
+                    save_contacts(contacts, private)
                     print_green("Message delivered successfully.\n")
 
 
@@ -89,7 +89,7 @@ class Application:
             The name of the contact created (used in get_recipient()).
         """
         print_bar("NEW CONTACT")
-        contacts = load_contacts()
+        contacts = load_contacts(self.private)
 
         # Get contact information
         print("Enter the information for your new contact...")
@@ -126,24 +126,24 @@ class Application:
             contacts[new_id] = {"name": name, "ip": ip, "fingerprint": fingerprint, "messages": []}
             print_green("Contact added.\n")
 
-        save_contacts(contacts)
+        save_contacts(contacts, self.private)
 
     
     def delete_contact(self):
-        contacts = load_contacts()
+        contacts = load_contacts(self.private)
         print_bar("DELETE CONTACT")
         contact_id = get_recipient(contacts)
         if confirm("Are you sure you would like do delete contact information for {}? (Y/n)".format(contacts[contact_id]["name"])):
             del contacts[contact_id]
             print_green("Contact deleted.\n")
-            save_contacts(contacts)
+            save_contacts(contacts, self.private)
         else:
             print_red("Aborted.\n")
 
     
     def list_contacts(self):
         """Displays each of the contacts in the contacts file."""
-        contacts = load_contacts()
+        contacts = load_contacts(self.private)
         print_bar("CONTACTS LIST")
         for contact_id in contacts:
             display_contact(contact_id, contacts)

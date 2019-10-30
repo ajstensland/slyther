@@ -2,56 +2,85 @@ import json
 from os.path import exists
 from os import makedirs
 from src.ui import *
+from src.socks import encrypt_aes, encrypt_rsa, decrypt_aes, decrypt_rsa
+from Crypto.Random import get_random_bytes
 
 CONTACTS_DIR = "data/contacts/"
 CONTACTS_PATH = "data/contacts/contacts.json"
 
-def load_contacts():
+def load_contacts(private):
     """
-    Loads the contacts dictionary from the CONTACTS_PATH.
+    Decrypts and loads the contacts dictionary from the CONTACTS_PATH.
 
+    Args:
+        private: The user's private RSA key.
+    
     Returns:
         A dictionary of contacts, in the format:
         { 
-            "name": { 
+            id:     { 
+                        "name": <name>,
                         "ip": <ip>,
                         "fingerprint": <fingerprint>,
                         "messages": {   "time": <time>,
-                                        "to": <name>,
-                                        "from": <name/ip>,
+                                        "recieved": <bool>
                                         "contents": <text> 
                                     }
                     }
         }
     """
+    print("--> LOAD CONTACTS")
     try:
-        with open(CONTACTS_PATH, "r") as contacts_file:
-            return json.load(contacts_file)
+        print("Opening key file...")
+        with open(CONTACTS_DIR + "enc.key", "rb") as key_file:
+            encrypted_key = key_file.read()
+
+        print("Opening contacts file...")
+        with open(CONTACTS_PATH, "rb") as contacts_file:
+            encrypted_contacts = contacts_file.read()
     except FileNotFoundError:
         return {}
     except OSError:
         if not exists(CONTACTS_DIR):
             makedirs(CONTACTS_DIR)
         else:
-            print_red("Error: Contacts file not accessible.")
+            print_red("Error: Contacts data not accessible.")
         return {}
 
+    print("Decrypting key...")
+    key = decrypt_rsa(encrypted_key, private)
+    
+    print("Decrypting contacts...")
+    contacts_string = decrypt_aes(encrypted_contacts, key).decode()
+    print(contacts_string)
+    return json.loads(contacts_string)
 
-def save_contacts(contacts):
+
+
+def save_contacts(contacts, private):
     """
     Saves the contacts dictionary to the CONTACTS_PATH.
 
     Args:
         contacts: The contacts dictionary to save.
     """
+    key = get_random_bytes(16) 
+    contacts_string = json.dumps(contacts)
+
+    encrypted_contacts = encrypt_aes(contacts_string.encode(), key)
+    encrypted_key = encrypt_rsa(key, private)
+
     try:
-        with open(CONTACTS_PATH, "w") as contacts_file:
-            json.dump(contacts, contacts_file)
+        with open(CONTACTS_DIR + "enc.key", "wb") as key_file:
+            key_file.write(encrypted_key)
+
+        with open(CONTACTS_PATH, "wb") as contacts_file:
+            contacts_file.write(encrypted_contacts)
     except OSError:
         if not exists(CONTACTS_DIR):
             makedirs(CONTACTS_DIR)
-            with open(CONTACTS_PATH, "w") as contacts_file:
-                json.dump(contacts, contacts_file)
+            with open(CONTACTS_PATH, "wb") as contacts_file:
+                contacts_file.write(encrypted_contacts)
         else:
             print_red("Error: Contacts file not accessible.")
 
