@@ -29,7 +29,6 @@ def load_contacts(private):
                     }
         }
     """
-    print("--> LOAD CONTACTS")
     try:
         with open(CONTACTS_DIR + "enc.key", "rb") as key_file:
             encrypted_key = key_file.read()
@@ -74,6 +73,8 @@ def save_contacts(contacts, private):
     except OSError:
         if not exists(CONTACTS_DIR):
             makedirs(CONTACTS_DIR)
+            with open(CONTACTS_DIR + "enc.key", "wb") as key_file:
+                key_file.write(encrypted_key)
             with open(CONTACTS_PATH, "wb") as contacts_file:
                 contacts_file.write(encrypted_contacts)
         else:
