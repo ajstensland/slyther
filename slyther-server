@@ -45,7 +45,7 @@ def handle_client(sock, addr, public, private):
         private: The private key of this user.
     """
     print("Handling client")
-    contacts = load_contacts()
+    contacts = load_contacts(private)
     display_name = get_contact_name(addr[0], contacts)
     print_green("New connection from {}!".format(display_name))
     
@@ -82,7 +82,7 @@ def handle_client(sock, addr, public, private):
                                         "ip": addr[0],
                                         "fingerprint": None,    # Tweak when fingerprint time
                                         "messages": [message_receipt]}
-        save_contacts(contacts)
+        save_contacts(contacts, private)
     finally:
         print(" > Closing connection...")
         sock.close()
