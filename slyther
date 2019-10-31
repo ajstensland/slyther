@@ -132,6 +132,7 @@ class Application:
     def delete_contact(self):
         contacts = load_contacts(self.private)
         print_bar("DELETE CONTACT")
+        display_messages(contacts)
         contact_id = get_recipient(contacts)
         if confirm("Are you sure you would like do delete contact information for {}? (Y/n)".format(contacts[contact_id]["name"])):
             del contacts[contact_id]
