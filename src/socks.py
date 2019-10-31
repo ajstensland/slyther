@@ -5,22 +5,25 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.Signature import pkcs1_15
+from src.fingerprints import verify_fingerprint
 
 
 PORT = 5300
 
 
-def transmit(contact, message, public, private):
+def transmit(contact, message, public, private, check_fingerprint=True):
     """
     Sends a message to the provided contact.
 
     Args:
         contact: The contact information of the recipient in the format:
-            { "ip": <ip>, "fingerprint": <fingerprint>, "messages": <messages>}
+            { "name": <name>, "ip": <ip>, "fingerprint": <fingerprint>, "messages": <messages>}
             For more detail, see load_contacts() in src/contacts.py.
         message: The message (in bytes) to send.
         public: The user's public RSA key.
         private: The user's private RSA key.
+        fingerprint_verify: Whether or not to throw a warning when a client's public key
+            doesn't match their fingerprint.
 
     Raises:
         socket.error: Client server not accessible.
@@ -32,6 +35,10 @@ def transmit(contact, message, public, private):
         # Exchanging public keys
         send(sock, public.export_key())
         client_public = RSA.import_key(receive(sock))
+
+        # Verify client key against fingerprint
+        if check_fingerprint and contact["fingerprint"]:
+            assert(verify_fingerprint(client_public, contact["fingerprint"]))
 
         # Creating and sending session key
         session = get_random_bytes(16)

@@ -9,6 +9,7 @@ from src.ui import *
 from src.keys import login
 import src.socks as socks
 from src.contacts import load_contacts, save_contacts, display_contact, display_convo, display_messages
+from src.fingerprints import create_fingerprint 
 
 
 class Application:
@@ -38,6 +39,7 @@ class Application:
                     "nc": self.new_contact, 
                     "lc": self.list_contacts,
                     "dc": self.delete_contact,
+                    "fp": self.get_fingerprint,
                     "c" : self.clear_screen,
                     "h" : self.display_help,
                     "q" : self.quit 
@@ -56,22 +58,39 @@ class Application:
         print_bar("VIEW CONVERSATION")
         display_messages(contacts)
         contact_id = get_recipient(contacts)
+        verify_fingerprints = True
 
         while True:
-            display_convo(contacts[contact_id])
-            message = input("Message: ").encode()
             contacts = load_contacts(self.private)
+            display_convo(contacts[contact_id])
+
+            if not verify_fingerprints:
+                print_yellow("Fingerprint verification disabled.")
+            message = input("Message: ").encode()
 
             if len(message.decode()) > 0:
                 try:
-                    socks.transmit(contacts[contact_id], message, self.public, self.private)
+                    socks.transmit(contacts[contact_id], message, self.public, self.private, check_fingerprint=verify_fingerprints)
                 
                 except socket.error as e:
                     print_red("Error: Failed to connect to contact. Transmission cancelled.\n")
                     break
+                
                 except socket.timeout:
                     print_red("Error: Connection timed out. Transmission incomplete.\n")
                     break
+
+                except AssertionError:
+                    print_yellow("\nWARNING: Contact fingerprint does not match. Transmission cancelled.")
+                    print("Either your contact has changed keys, or something may be going on.")
+                    print("Confirm with them over a secure channel.\n")
+
+                    if confirm("Temporarily disable fingerprint verification? (Y/n) "):
+                        verify_fingerprints = False
+                    else:
+                        print_green("Aborted.\n")
+                        break
+
                 else:
                     message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
                                         "recieved": False, 
@@ -150,6 +169,13 @@ class Application:
             display_contact(contact_id, contacts)
 
 
+    def get_fingerprint(self):
+        print_bar("PUBLIC FINGERPRINT")
+        print_yellow("Copy and paste the following fingerprint into trusted channels only.\n")
+        print(create_fingerprint(self.public))
+        print()
+    
+
     def clear_screen(self):
         run(["clear"])
 
@@ -161,6 +187,7 @@ class Application:
         print("nc   -> New/Update Contact")
         print("lc   -> List Contacts")
         print("dc   -> Delete Contact")
+        print("fp   -> Display Fingerprint")
         print("c    -> Clear Screen")
         print("h    -> Display help")
         print("q    -> Quit slyther\n")

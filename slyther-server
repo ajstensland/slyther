@@ -7,6 +7,7 @@ from src.socks import receive, receive_session, receive_aes, send, PORT
 from src.keys import login
 from src.contacts import load_contacts, save_contacts
 from src.ui import *
+from src.fingerprints import create_fingerprint, verify_fingerprint
 
 
 def print_banner():
@@ -17,20 +18,20 @@ def print_banner():
     print_green("/////////////////////")
 
 
-def get_contact_name(ip, contacts):
+def get_contact_id(ip, contacts):
     """
-    Given an IP address, finds the corresponding contact name.
+    Given an IP address, finds the corresponding contact ID.
 
     Args:
         ip: The ip address to match with a contact name.
         contacts: The contacts dictionary to search.
 
     Return:
-        The name of the contact if the IP is known, otherwise the IP.
+        The ID of the contact if the IP is known, otherwise the IP.
     """
     for contact_id in contacts:
         if contacts[contact_id]["ip"] == ip:
-            return contacts[contact_id]["name"]
+            return contact_id
     return ip
 
 
@@ -44,47 +45,65 @@ def handle_client(sock, addr, public, private):
         public: The public key of this user.
         private: The private key of this user.
     """
-    print("Handling client")
     contacts = load_contacts(private)
-    display_name = get_contact_name(addr[0], contacts)
-    print_green("New connection from {}!".format(display_name))
+    contact_id = get_contact_id(addr[0], contacts)
     
-    print(" > Performing key exchange...")
-    client_public = RSA.import_key(receive(sock))
-    print("    :  Received public key.")
-    send(sock, public.export_key())
-    print("    :  Sent public key.")
-
-    print(" > Receiving message...")
+    if contact_id in contacts:
+        print_green("New connection from {}!".format(contacts[contact_id]["name"]))
+    else:
+        print_green("New connection from {}!".format(contact_id))
+    
     try:
+        print(" > Performing key exchange...")
+        client_public = RSA.import_key(receive(sock))
+        print("    : Received public key.")
+        
+        # Check fingerprint
+        trusted = True
+        if contact_id in contacts:
+            if not verify_fingerprint(client_public, contacts[contact_id]["fingerprint"]):
+                print_yellow("    : Fingerprint mismatch. Untrusted.")
+
+        send(sock, public.export_key())
+        print("    : Sent public key.")
+
+        print(" > Receiving message...")
         session_key = receive_session(sock, client_public, private)
         print("    : Received session key.")
         message = receive_aes(sock, client_public, session_key)
         print("    : Received message.")
     except ValueError as e:
-        print_red("Error receiving message.")
+        print_red("    : Error receiving message.")
         print(e)
+    except OSError:
+        print_red("    : Connection lost. Message not recieved.")
     else:
         print(" > Storing message...")
-        message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
-                            "recieved": True,
-                            "contents": message.decode() }
 
-        sender_id = 0
-        for contact_id in contacts:
-            if display_name == contacts[contact_id]["name"]:
-                sender_id = contact_id
+        # Add warning if fingerprint does not match
+        trusted = True
+        if contact_id in contacts:
+            if verify_fingerprint(client_public, contacts[contact_id]["fingerprint"]):
+                message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
+                                    "recieved": True,
+                                    "contents": "!UNTRUSTED! {} !UNTRUSTED!".format(message.decode()) }
 
-        if sender_id:
-            contacts[sender_id]["messages"].append(message_receipt)
+            else:
+                message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
+                                    "recieved": True,
+                                    "contents": message.decode() }
+
+        if contact_id in contacts:
+            contacts[contact_id]["messages"].append(message_receipt)
         else:
-            contacts[display_name] = {  "name": display_name,
+            contacts[contact_id] = {  "name": contact_id,
                                         "ip": addr[0],
-                                        "fingerprint": None,    # Tweak when fingerprint time
+                                        "fingerprint": create_fingerprint(client_public),
                                         "messages": [message_receipt]}
+
         save_contacts(contacts, private)
     finally:
-        print(" > Closing connection...")
+        print(" > Closing connection...\n")
         sock.close()
         
 
@@ -106,7 +125,6 @@ if __name__ == "__main__":
             while True:
                 try:
                     connection, addr = sock.accept()
-                    print("Connection")
                     connection_thread = Thread( target=handle_client, 
                                                 args=(connection, addr, public, private))
                     connection_thread.start()
