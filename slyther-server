@@ -59,7 +59,8 @@ def handle_client(sock, addr, public, private):
         print("    : Received public key.")
         
         # Check fingerprint
-        if contact_id in contacts:
+        if contact_id in contacts and contacts[contact_id]["fingerprint"] is not None:
+            print(contacts[contact_id]["fingerprint"])
             if not verify_fingerprint(client_public, contacts[contact_id]["fingerprint"]):
                 print_yellow("    : Fingerprint mismatch. Untrusted.")
 
@@ -84,7 +85,7 @@ def handle_client(sock, addr, public, private):
                             "contents": message.decode() }
         if contact_id in contacts:
             # Edit message if untrusted 
-            if not verify_fingerprint(client_public, contacts[contact_id]["fingerprint"]):
+            if contacts[contact_id]["fingerprint"] is not None and not verify_fingerprint(client_public, contacts[contact_id]["fingerprint"]):
                 message_receipt = { "time": datetime.now().strftime("%m/%d/%y %I:%M%p"), 
                                     "recieved": True,
                                     "contents": "!UNTRUSTED! {} !UNTRUSTED!".format(message.decode()) }
