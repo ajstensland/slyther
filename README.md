@@ -25,7 +25,7 @@ python -m pip install -r requirements.txt
 ## Screenshots
 **Main Menu**
 
-![menu](screens/main_menu.png "")
+![menu](screens/menu.png "")
 
 **Server Log**
 
