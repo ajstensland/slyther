@@ -104,5 +104,4 @@ def get_command(commands):
 
 
 def print_bar(msg):
-    print("-"*(16 - int(.5 * len(msg))), msg, "-"*(16 - int(.5 * len(msg))))
-
+    print("-"*(31 - int(.5 * len(msg))), msg, "-"*(31 - int(.5 * len(msg))))
